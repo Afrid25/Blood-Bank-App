@@ -1,283 +1,242 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blood Bank Management</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-
-        header {
-            background-color: #d32f2f;
-            color: white;
-            text-align: center;
-            padding: 1rem;
-        }
-
-        main {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 1rem;
-        }
-
-        section {
-            background-color: white;
-            margin-bottom: 2rem;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        h2 {
-            color: #d32f2f;
-        }
-
-        form {
-            display: grid;
-            gap: 0.5rem;
-        }
-
-        label {
-            font-weight: bold;
-        }
-
-        input, select, textarea {
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        button {
-            background-color: #d32f2f;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #b71c1c;
-        }
-
-        #donor-list, #search-results {
-            margin-top: 1rem;
-        }
-
-        .donor {
-            border: 1px solid #ddd;
-            padding: 0.5rem;
-            margin-bottom: 0.5rem;
-            border-radius: 4px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blood Bank Management</title>
+<style>
+    body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f4f4; }
+    header { background:#d32f2f; color:white; text-align:center; padding:1rem; }
+    main { max-width:900px; margin:20px auto; padding:1rem; }
+    section { background:white; margin-bottom:2rem; padding:1rem; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+    h2 { color:#d32f2f; }
+    form { display:grid; gap:0.5rem; }
+    label { font-weight:bold; }
+    input, select, textarea, button { padding:0.5rem; border:1px solid #ccc; border-radius:4px; }
+    button { background:#d32f2f; color:white; border:none; cursor:pointer; }
+    button:hover { background:#b71c1c; }
+    .donor { border:1px solid #ddd; padding:0.5rem; margin-bottom:0.5rem; border-radius:4px; background:#fff8f8; }
+    .donor button { margin-top:5px; width:auto; padding:3px 7px; background:#555; }
+    .donor button:hover { background:#333; }
+</style>
 </head>
 <body>
-    <header>
-        <h1>Blood Bank Management System</h1>
-    </header>
-    
-    <main>
-        <section id="add-donor">
-            <h2>Add Donor</h2>
-            <form id="donor-form">
-                <label for="name">Name:</label>
-                <input type="text" id="name" required>
-                
-                <label for="age">Age:</label>
-                <input type="number" id="age" min="18" required>
-                
-                <label for="blood-group">Blood Group:</label>
-                <select id="blood-group" required>
-                    <option value="">Select</option>
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
-                </select>
-                
-                <label for="phone">Phone:</label>
-                <input type="tel" id="phone" required>
-                
-                <label for="address">Address:</label>
-                <textarea id="address" required></textarea>
-                
-                <label for="last-donation">Last Donation Date (YYYY-MM-DD):</label>
-                <input type="date" id="last-donation" required>
-                
-                <button type="submit">Add Donor</button>
-            </form>
-            <p id="add-message"></p>
-        </section>
-        
-        <section id="search-donor">
-            <h2>Search Donor by Blood Group</h2>
-            <select id="search-group">
-                <option value="">Select Blood Group</option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-            </select>
-            <button id="search-btn">Search</button>
-            <div id="search-results"></div>
-        </section>
-        
-        <section id="all-donors">
-            <h2>All Donors</h2>
-            <button id="show-all-btn">Show All Donors</button>
-            <div id="donor-list"></div>
-        </section>
-    </main>
-    
-    <script>
-        // Donor class equivalent
-        class Donor {
-            constructor(name, age, bloodGroup, phone, address, lastDonationDate) {
-                this.name = name;
-                this.age = age;
-                this.bloodGroup = bloodGroup;
-                this.phone = phone;
-                this.address = address;
-                this.lastDonationDate = lastDonationDate;
-            }
+<header>
+    <h1>Blood Bank Management System</h1>
+</header>
+<main>
+<section id="add-donor">
+    <h2>Add Donor</h2>
+    <form id="donor-form">
+        <label>Name:</label><input type="text" id="name" required>
+        <label>Age:</label><input type="number" id="age" min="18" required>
+        <label>Blood Group:</label>
+        <select id="blood-group" required>
+            <option value="">Select</option>
+            <option value="A+">A+</option><option value="A-">A-</option>
+            <option value="B+">B+</option><option value="B-">B-</option>
+            <option value="AB+">AB+</option><option value="AB-">AB-</option>
+            <option value="O+">O+</option><option value="O-">O-</option>
+        </select>
+        <label>Phone:</label><input type="tel" id="phone" required>
+        <label>Address:</label><textarea id="address" required></textarea>
+        <label>Last Donation Date:</label><input type="date" id="last-donation" required>
+        <button type="submit">Add Donor</button>
+    </form>
+    <p id="add-message"></p>
+</section>
 
-            display() {
-                return `
-                    <div class="donor">
-                        <p><strong>Name:</strong> ${this.name}</p>
-                        <p><strong>Age:</strong> ${this.age}</p>
-                        <p><strong>Blood Group:</strong> ${this.bloodGroup}</p>
-                        <p><strong>Phone:</strong> ${this.phone}</p>
-                        <p><strong>Address:</strong> ${this.address}</p>
-                        <p><strong>Last Donation Date:</strong> ${this.lastDonationDate}</p>
-                    </div>
-                `;
-            }
+<section id="search-donor">
+    <h2>Search Donor by Blood Group</h2>
+    <select id="search-group">
+        <option value="">Select Blood Group</option>
+        <option value="A+">A+</option><option value="A-">A-</option>
+        <option value="B+">B+</option><option value="B-">B-</option>
+        <option value="AB+">AB+</option><option value="AB-">AB-</option>
+        <option value="O+">O+</option><option value="O-">O-</option>
+    </select>
+    <button id="search-btn">Search</button>
+    <div id="search-results"></div>
+</section>
+
+<section id="all-donors">
+    <h2>All Donors</h2>
+    <button id="show-all-btn">Show All Donors</button>
+    <div id="donor-list"></div>
+</section>
+
+<section id="eligibility">
+    <h2>Check Eligibility</h2>
+    <button id="check-eligible-btn">Show Eligible Donors</button>
+    <div id="eligible-list"></div>
+</section>
+
+<script>
+class Donor {
+    constructor(name, age, bloodGroup, phone, address, lastDonationDate){
+        this.name = name;
+        this.age = age;
+        this.bloodGroup = bloodGroup;
+        this.phone = phone;
+        this.address = address;
+        this.lastDonationDate = lastDonationDate;
+    }
+    display(){
+        return `
+        <div class="donor">
+            <p><strong>Name:</strong> ${this.name}</p>
+            <p><strong>Age:</strong> ${this.age}</p>
+            <p><strong>Blood Group:</strong> ${this.bloodGroup}</p>
+            <p><strong>Phone:</strong> ${this.phone}</p>
+            <p><strong>Address:</strong> ${this.address}</p>
+            <p><strong>Last Donation:</strong> ${this.lastDonationDate}</p>
+            <button onclick="updateDonation('${this.phone}')">Update Donation Date</button>
+            <button onclick="deleteDonor('${this.phone}')">Delete Donor</button>
+        </div>
+        `;
+    }
+}
+
+class BloodBank {
+    constructor(){
+        this.donors = this.loadFromStorage();
+    }
+
+    monthsDifference(date1, date2){
+        const d1 = new Date(date1);
+        const d2 = new Date(date2);
+        return (d2.getFullYear()-d1.getFullYear())*12 + (d2.getMonth()-d1.getMonth());
+    }
+
+    addDonor(name, age, bloodGroup, phone, address, lastDonationDate){
+        const today = new Date().toISOString().split('T')[0];
+        if(lastDonationDate > today) return "Invalid date.";
+        const diff = this.monthsDifference(lastDonationDate, today);
+        if(diff<3) return "Donor not eligible yet. Wait 3 months.";
+        this.donors.push(new Donor(name, age, bloodGroup, phone, address, lastDonationDate));
+        this.saveToStorage();
+        return "Donor added successfully!";
+    }
+
+    searchDonor(bloodGroup){
+        return this.donors.filter(d=>d.bloodGroup===bloodGroup);
+    }
+
+    getAllDonors(){ return this.donors; }
+
+    updateDonation(phone){
+        const donor = this.donors.find(d=>d.phone===phone);
+        if(donor){
+            donor.lastDonationDate = new Date().toISOString().split('T')[0];
+            this.saveToStorage();
+            return true;
         }
+        return false;
+    }
 
-        // BloodBank class equivalent
-        class BloodBank {
-            constructor() {
-                this.donors = this.loadFromStorage();
-            }
-
-            // Helper: calculate months difference
-            monthsDifference(date1, date2) {
-                const d1 = new Date(date1);
-                const d2 = new Date(date2);
-                return (d2.getFullYear() - d1.getFullYear()) * 12 + (d2.getMonth() - d1.getMonth());
-            }
-
-            // Add donor with checks
-            addDonor(name, age, bloodGroup, phone, address, lastDonationDate) {
-                const today = new Date().toISOString().split('T')[0];
-                
-                if (lastDonationDate > today) {
-                    return "Invalid last donation date (cannot be in the future).";
-                }
-                
-                const diff = this.monthsDifference(lastDonationDate, today);
-                if (diff < 3) {
-                    return "Donor is not eligible yet. Must wait at least 3 months since last donation.";
-                }
-                
-                const donor = new Donor(name, age, bloodGroup, phone, address, lastDonationDate);
-                this.donors.push(donor);
-                this.saveToStorage();
-                return "Donor added successfully!";
-            }
-
-            // Search by blood group
-            searchDonor(bloodGroup) {
-                return this.donors.filter(d => d.bloodGroup === bloodGroup);
-            }
-
-            // Get all donors
-            getAllDonors() {
-                return this.donors;
-            }
-
-            // Save to localStorage
-            saveToStorage() {
-                localStorage.setItem('donors', JSON.stringify(this.donors));
-            }
-
-            // Load from localStorage
-            loadFromStorage() {
-                const data = localStorage.getItem('donors');
-                if (data) {
-                    const parsed = JSON.parse(data);
-                    return parsed.map(d => new Donor(d.name, d.age, d.bloodGroup, d.phone, d.address, d.lastDonationDate));
-                }
-                return [];
-            }
+    deleteDonor(phone){
+        const index = this.donors.findIndex(d=>d.phone===phone);
+        if(index!==-1){
+            this.donors.splice(index,1);
+            this.saveToStorage();
+            return true;
         }
+        return false;
+    }
 
-        // Initialize BloodBank
-        const bank = new BloodBank();
-
-        // DOM elements
-        const form = document.getElementById('donor-form');
-        const addMessage = document.getElementById('add-message');
-        const searchBtn = document.getElementById('search-btn');
-        const searchGroup = document.getElementById('search-group');
-        const searchResults = document.getElementById('search-results');
-        const showAllBtn = document.getElementById('show-all-btn');
-        const donorList = document.getElementById('donor-list');
-
-        // Add donor event
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = document.getElementById('name').value;
-            const age = parseInt(document.getElementById('age').value);
-            const bloodGroup = document.getElementById('blood-group').value;
-            const phone = document.getElementById('phone').value;
-            const address = document.getElementById('address').value;
-            const lastDonation = document.getElementById('last-donation').value;
-            
-            const message = bank.addDonor(name, age, bloodGroup, phone, address, lastDonation);
-            addMessage.textContent = message;
-            form.reset();
+    getEligibleDonors(){
+        const today = new Date().toISOString().split('T')[0];
+        return this.donors.map(d=>{
+            const diff = this.monthsDifference(d.lastDonationDate, today);
+            return {...d, eligible: diff>=3};
         });
+    }
 
-        // Search donor event
-        searchBtn.addEventListener('click', () => {
-            const group = searchGroup.value;
-            if (!group) {
-                searchResults.innerHTML = '<p>Please select a blood group.</p>';
-                return;
-            }
-            const results = bank.searchDonor(group);
-            if (results.length === 0) {
-                searchResults.innerHTML = `<p>No donors found with blood group ${group}.</p>`;
-            } else {
-                searchResults.innerHTML = results.map(d => d.display()).join('');
-            }
-        });
+    saveToStorage(){ localStorage.setItem('donors', JSON.stringify(this.donors)); }
 
-        // Show all donors event
-        showAllBtn.addEventListener('click', () => {
-            const donors = bank.getAllDonors();
-            if (donors.length === 0) {
-                donorList.innerHTML = '<p>No donors available.</p>';
-            } else {
-                donorList.innerHTML = donors.map(d => d.display()).join('');
-            }
-        });
-    </script>
+    loadFromStorage(){
+        const data = localStorage.getItem('donors');
+        if(data){
+            return JSON.parse(data).map(d=>new Donor(d.name,d.age,d.bloodGroup,d.phone,d.address,d.lastDonationDate));
+        }
+        return [];
+    }
+}
+
+const bank = new BloodBank();
+
+// DOM
+const form = document.getElementById('donor-form');
+const addMessage = document.getElementById('add-message');
+const searchBtn = document.getElementById('search-btn');
+const searchGroup = document.getElementById('search-group');
+const searchResults = document.getElementById('search-results');
+const showAllBtn = document.getElementById('show-all-btn');
+const donorList = document.getElementById('donor-list');
+const checkEligibleBtn = document.getElementById('check-eligible-btn');
+const eligibleList = document.getElementById('eligible-list');
+
+form.addEventListener('submit',(e)=>{
+    e.preventDefault();
+    const name = document.getElementById('name').value;
+    const age = parseInt(document.getElementById('age').value);
+    const bloodGroup = document.getElementById('blood-group').value;
+    const phone = document.getElementById('phone').value;
+    const address = document.getElementById('address').value;
+    const lastDonation = document.getElementById('last-donation').value;
+    const msg = bank.addDonor(name, age, bloodGroup, phone, address, lastDonation);
+    addMessage.textContent = msg;
+    form.reset();
+});
+
+searchBtn.addEventListener('click',()=>{
+    const group = searchGroup.value;
+    if(!group) { searchResults.innerHTML='<p>Select blood group.</p>'; return; }
+    const results = bank.searchDonor(group);
+    if(results.length===0){ searchResults.innerHTML=`<p>No donors found with ${group}.</p>`; return;}
+    searchResults.innerHTML = results.map(d=>d.display()).join('');
+});
+
+showAllBtn.addEventListener('click',()=>{
+    const donors = bank.getAllDonors();
+    if(donors.length===0){ donorList.innerHTML='<p>No donors.</p>'; return; }
+    donorList.innerHTML = donors.map(d=>d.display()).join('');
+});
+
+checkEligibleBtn.addEventListener('click',()=>{
+    const list = bank.getEligibleDonors();
+    if(list.length===0){ eligibleList.innerHTML='<p>No donors.</p>'; return;}
+    eligibleList.innerHTML = list.map(d=>`
+        <div class="donor">
+            <p><strong>Name:</strong> ${d.name}</p>
+            <p><strong>Blood Group:</strong> ${d.bloodGroup}</p>
+            <p><strong>Phone:</strong> ${d.phone}</p>
+            <p><strong>Eligible:</strong> ${d.eligible?'✅ Yes':'❌ No'}</p>
+        </div>
+    `).join('');
+});
+
+// Global functions for buttons inside donor cards
+function updateDonation(phone){
+    if(bank.updateDonation(phone)){
+        alert('Donation date updated to today.');
+        showAllBtn.click();
+        checkEligibleBtn.click();
+        searchBtn.click();
+    } else { alert('Donor not found.'); }
+}
+
+function deleteDonor(phone){
+    if(confirm('Are you sure you want to delete this donor?')){
+        if(bank.deleteDonor(phone)){
+            alert('Donor deleted.');
+            showAllBtn.click();
+            checkEligibleBtn.click();
+            searchBtn.click();
+        } else { alert('Donor not found.'); }
+    }
+}
+</script>
+</main>
 </body>
 </html>
