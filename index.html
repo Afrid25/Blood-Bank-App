@@ -1,5 +1,6 @@
+// ...existing code...
 <!DOCTYPE html>
-<html lang="en>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -566,7 +567,7 @@
         <div class="header-content">
             <div class="logo">
                 <i class="fas fa-tint"></i>
-                <h1>Blood Bank Management System</h1>
+                <h1>Emergency Blood Bank </h1>
             </div>
             <nav>
                 <ul>
@@ -684,7 +685,7 @@
                             <textarea id="medical-conditions" rows="2"></textarea>
                         </div>
                     </div>
-                    <button type="submit"><i class="fas fa-save"></i> Add Donor</button>
+                    <button type="submit" id="submit-btn"><i class="fas fa-save"></i> Add Donor</button>
                 </form>
             </section>
         </div>
@@ -805,15 +806,44 @@
         </div>
     </div>
 
+    <script>
+        const BIN_ID = "672871c5ad19ca34f8ea85d4"; // তোমার JSON Bin ID
+        const API_KEY = "$2a$10$cGXEQBiI3afpgMCjCQUOR.ISk3bjnPm79tLseP5TkxrtJSXuggnMu";
+
+    // Donor Data Load
+            async function loadDonors() {
+            const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+            headers: {
+                'X-Master-Key': API_KEY
+            }
+        });
+        const data = await response.json();
+        return data.record?.donors || [];
+    }
+
+    // Donor Data Save
+    async function saveDonors(donors) {
+        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': API_KEY
+            },
+            body: JSON.stringify({ donors })
+        });
+    }
+    </script>
+
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
         // In a real application, this would be replaced with API calls to a backend server
-        // For demonstration, we'll simulate the backend functionality with localStorage
-        // but structure the code as if it were making API calls
+        // For demonstration, we'll simulate the backend functionality with JSONBin + in-memory instances
 
         class Donor {
-            constructor(name, age, bloodGroup, phone, address, lastDonationDate, email = '', gender = '', medicalConditions = '') {
-                this.id = Date.now().toString();
+            constructor(name, age, bloodGroup, phone, address, lastDonationDate, email = '', gender = '', medicalConditions = '', id = null, createdAt = null, nextDonationDate = null) {
+                this.id = id || Date.now().toString();
                 this.name = name;
                 this.age = age;
                 this.bloodGroup = bloodGroup;
@@ -823,8 +853,13 @@
                 this.email = email;
                 this.gender = gender;
                 this.medicalConditions = medicalConditions;
-                this.createdAt = new Date().toISOString();
-                this.nextDonationDate = this.calculateNextDonationDate();
+                this.createdAt = createdAt || new Date().toISOString();
+                if (nextDonationDate) {
+                    // stored as ISO or string - normalize to Date
+                    this.nextDonationDate = new Date(nextDonationDate);
+                } else {
+                    this.nextDonationDate = this.calculateNextDonationDate();
+                }
             }
 
             calculateNextDonationDate() {
@@ -898,28 +933,52 @@
                     </div>
                 `;
             }
+
+            toPlainObject() {
+                return {
+                    id: this.id,
+                    name: this.name,
+                    age: this.age,
+                    bloodGroup: this.bloodGroup,
+                    phone: this.phone,
+                    address: this.address,
+                    lastDonationDate: this.lastDonationDate,
+                    email: this.email,
+                    gender: this.gender,
+                    medicalConditions: this.medicalConditions,
+                    createdAt: this.createdAt,
+                    nextDonationDate: (this.nextDonationDate instanceof Date) ? this.nextDonationDate.toISOString() : this.nextDonationDate
+                };
+            }
         }
 
         class BloodBank {
             constructor() {
-                this.donors = this.loadFromStorage();
+                this.donors = [];
                 this.currentPage = 1;
                 this.itemsPerPage = 5;
-                this.filteredDonors = [...this.donors];
+                this.filteredDonors = [];
+                this.init(); // async init
             }
 
-            // Simulate API calls with localStorage
-            // In a real application, these would be actual API calls to a backend server
-            
+            async init() {
+                // load donors from storage (JSONBin)
+                const loaded = await this.loadFromStorage();
+                this.donors = loaded || [];
+                this.filteredDonors = [...this.donors];
+                updateDashboard();
+            }
+
+            // Simulate API calls with JSONBin + in-memory objects
+
             async fetchDonors() {
-                // Simulate API delay
-                await new Promise(resolve => setTimeout(resolve, 500));
-                return this.loadFromStorage();
+                // return fresh copy
+                await new Promise(resolve => setTimeout(resolve, 200));
+                return this.donors;
             }
 
             async saveDonor(donorData) {
-                // Simulate API delay
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await new Promise(resolve => setTimeout(resolve, 200));
                 
                 const donor = new Donor(
                     donorData.name,
@@ -934,44 +993,54 @@
                 );
                 
                 this.donors.push(donor);
-                this.saveToStorage();
+                await this.saveToStorage();
                 return { success: true, message: "Donor added successfully!" };
             }
 
             async updateDonor(donorId, donorData) {
-                // Simulate API delay
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await new Promise(resolve => setTimeout(resolve, 200));
                 
                 const index = this.donors.findIndex(d => d.id === donorId);
                 if (index !== -1) {
-                    this.donors[index] = { ...this.donors[index], ...donorData };
-                    this.saveToStorage();
+                    const donor = this.donors[index];
+                    // update fields
+                    donor.name = donorData.name;
+                    donor.age = donorData.age;
+                    donor.bloodGroup = donorData.bloodGroup;
+                    donor.phone = donorData.phone;
+                    donor.address = donorData.address;
+                    donor.lastDonationDate = donorData.lastDonationDate;
+                    donor.email = donorData.email;
+                    donor.gender = donorData.gender;
+                    donor.medicalConditions = donorData.medicalConditions;
+                    // recalc nextDonationDate
+                    donor.nextDonationDate = donor.calculateNextDonationDate();
+                    await this.saveToStorage();
                     return { success: true, message: "Donor updated successfully!" };
                 }
                 return { success: false, message: "Donor not found!" };
             }
 
             async deleteDonor(donorId) {
-                // Simulate API delay
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await new Promise(resolve => setTimeout(resolve, 200));
                 
                 const index = this.donors.findIndex(d => d.id === donorId);
                 if (index !== -1) {
                     this.donors.splice(index, 1);
-                    this.saveToStorage();
+                    await this.saveToStorage();
                     return { success: true, message: "Donor deleted successfully!" };
                 }
                 return { success: false, message: "Donor not found!" };
             }
 
             async updateDonationDate(donorId) {
-                // Simulate API delay
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await new Promise(resolve => setTimeout(resolve, 200));
                 
                 const donor = this.donors.find(d => d.id === donorId);
                 if (donor) {
                     donor.lastDonationDate = new Date().toISOString().split('T')[0];
-                    this.saveToStorage();
+                    donor.nextDonationDate = donor.calculateNextDonationDate();
+                    await this.saveToStorage();
                     return { success: true, message: "Donation date updated successfully!" };
                 }
                 return { success: false, message: "Donor not found!" };
@@ -1030,7 +1099,8 @@
                     const monthsDiff = (today.getFullYear() - lastDonation.getFullYear()) * 12 + 
                                        (today.getMonth() - lastDonation.getMonth());
                     const eligible = monthsDiff >= 3;
-                    return { ...d, eligible };
+                    d.eligible = eligible; // attach to Donor instance
+                    return d;
                 });
                 
                 if (filter === 'eligible') {
@@ -1111,7 +1181,7 @@
             }
 
             exportToJSON() {
-                const dataStr = JSON.stringify(this.donors, null, 2);
+                const dataStr = JSON.stringify(this.donors.map(d => d.toPlainObject()), null, 2);
                 const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
                 
                 const exportFileDefaultName = `blood_bank_donors_${new Date().toISOString().split('T')[0]}.json`;
@@ -1132,37 +1202,38 @@
                 return Math.ceil(items.length / this.itemsPerPage);
             }
 
-            saveToStorage() {
-                localStorage.setItem('donors', JSON.stringify(this.donors));
+            async saveToStorage() {
+                // Save plain objects and ISO dates
+                const plain = this.donors.map(d => d.toPlainObject());
+                await saveDonors(plain);
             }
 
-            loadFromStorage() {
-                const data = localStorage.getItem('donors');
-                if (data) {
-                    return JSON.parse(data).map(d => {
-                        const donor = new Donor(
-                            d.name,
-                            d.age,
-                            d.bloodGroup,
-                            d.phone,
-                            d.address,
-                            d.lastDonationDate,
-                            d.email,
-                            d.gender,
-                            d.medicalConditions
-                        );
-                        donor.id = d.id;
-                        donor.createdAt = d.createdAt;
-                        return donor;
-                    });
-                }
-                return [];
+            async loadFromStorage() {
+                const donorsData = await loadDonors();
+                // Map plain objects to Donor instances preserving ids and dates
+                const instances = donorsData.map(d => new Donor(
+                    d.name,
+                    d.age,
+                    d.bloodGroup,
+                    d.phone,
+                    d.address,
+                    d.lastDonationDate,
+                    d.email || '',
+                    d.gender || '',
+                    d.medicalConditions || '',
+                    d.id || null,
+                    d.createdAt || null,
+                    d.nextDonationDate || null
+                ));
+                return instances;
             }
+
         }
 
         // Initialize the blood bank
         const bank = new BloodBank();
         let currentChart = null;
+        let editDonorId = null;
 
         // DOM Elements
         const tabs = document.querySelectorAll('.tab');
@@ -1179,11 +1250,16 @@
         const closeModal = document.getElementById('close-modal');
         const donorPagination = document.getElementById('donor-pagination');
 
+        // search DOM elements
+        const searchBtn = document.getElementById('search-btn');
+        const searchGroup = document.getElementById('search-group');
+
         // Dashboard elements
         const totalDonorsEl = document.getElementById('total-donors');
         const eligibleDonorsEl = document.getElementById('eligible-donors');
         const bloodGroupsEl = document.getElementById('blood-groups');
         const recentDonationsEl = document.getElementById('recent-donations');
+        const submitBtn = document.getElementById('submit-btn');
 
         // Tab functionality
         tabs.forEach(tab => {
@@ -1226,11 +1302,12 @@
                 const targetId = link.getAttribute('href').substring(1);
                 
                 // Find and click the corresponding tab
-                document.querySelector(`.tab[data-tab="${targetId}"]`).click();
+                const tab = document.querySelector(`.tab[data-tab="${targetId}"]`);
+                if (tab) tab.click();
             });
         });
 
-        // Form submission
+        // Form submission (handle add and edit)
         donorForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -1253,15 +1330,30 @@
                 return;
             }
             
-            // Save donor
-            const result = await bank.saveDonor(formData);
-            
-            if (result.success) {
-                showNotification(result.message, 'success');
-                donorForm.reset();
-                updateDashboard();
+            if (editDonorId) {
+                const result = await bank.updateDonor(editDonorId, formData);
+                if (result.success) {
+                    showNotification(result.message, 'success');
+                    donorForm.reset();
+                    editDonorId = null;
+                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Add Donor';
+                    // switch to list
+                    document.querySelector('.tab[data-tab="all-donors"]').click();
+                } else {
+                    showNotification(result.message, 'error');
+                }
             } else {
-                showNotification(result.message, 'error');
+                const result = await bank.saveDonor(formData);
+                if (result.success) {
+                    showNotification(result.message, 'success');
+                    donorForm.reset();
+                    updateDashboard();
+                    // if on all donors tab refresh list
+                    const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
+                    if (activeTab === 'all-donors') loadAllDonors();
+                } else {
+                    showNotification(result.message, 'error');
+                }
             }
         });
 
@@ -1276,6 +1368,7 @@
             renderDonorList();
             renderPagination();
             updateCountdowns();
+            updateDashboard();
         }
 
         // Render donor list
@@ -1371,28 +1464,17 @@
         });
 
         // Search donors
-        document.getElementById('search-btn').addEventListener('click', () => {
-            const bloodGroup = document.getElementById('search-group').value;
-            const location = document.getElementById('search-location').value;
-            
-            if (!bloodGroup && !location) {
-                showNotification('Please enter search criteria', 'warning');
-                return;
-            }
-            
-            const results = bank.searchDonors(bloodGroup, location);
-            
+        searchBtn.addEventListener('click', () => {
+            const group = searchGroup.value;
+            const location = document.getElementById('search-location').value.trim();
+        
+            const results = bank.searchDonors(group, location);
+        
             if (results.length === 0) {
-                searchResults.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-search"></i>
-                        <p>No donors found matching your criteria</p>
-                    </div>
-                `;
-                return;
+                searchResults.innerHTML = `<p>No donors found for ${group || 'any group'} in ${location || 'this area'}.</p>`;
+            } else {
+                searchResults.innerHTML = results.map(d => d.display()).join('');
             }
-            
-            searchResults.innerHTML = results.map(d => d.display()).join('');
             updateCountdowns();
         });
 
@@ -1735,37 +1817,8 @@
             document.getElementById('gender').value = donor.gender || '';
             document.getElementById('medical-conditions').value = donor.medicalConditions || '';
             
-            // Change form submission to update instead of add
-            donorForm.onsubmit = async (e) => {
-                e.preventDefault();
-                
-                const formData = {
-                    name: document.getElementById('name').value,
-                    age: parseInt(document.getElementById('age').value),
-                    bloodGroup: document.getElementById('blood-group').value,
-                    phone: document.getElementById('phone').value,
-                    address: document.getElementById('address').value,
-                    lastDonationDate: document.getElementById('last-donation').value,
-                    email: document.getElementById('email').value,
-                    gender: document.getElementById('gender').value,
-                    medicalConditions: document.getElementById('medical-conditions').value
-                };
-                
-                const result = await bank.updateDonor(donorId, formData);
-                
-                if (result.success) {
-                    showNotification(result.message, 'success');
-                    donorForm.reset();
-                    
-                    // Reset form submission to add
-                    donorForm.onsubmit = arguments.callee.caller;
-                    
-                    // Switch back to all donors tab
-                    document.querySelector('.tab[data-tab="all-donors"]').click();
-                } else {
-                    showNotification(result.message, 'error');
-                }
-            };
+            editDonorId = donorId;
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Update Donor';
             
             // Close modal if open
             modal.classList.remove('show');
@@ -1891,9 +1944,12 @@
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', () => {
-            updateDashboard();
-            loadAllDonors();
-            initializeChart();
+            // bank.init called in constructor, but ensure UI refresh after load
+            setTimeout(async () => {
+                updateDashboard();
+                await loadAllDonors();
+                initializeChart();
+            }, 300);
             
             // Update countdowns every minute
             setInterval(updateCountdowns, 60000);
@@ -1901,3 +1957,4 @@
     </script>
 </body>
 </html>
+// ...existing code...
